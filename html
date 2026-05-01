@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>mindflux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --black: #080808;
+  --off-white: #f0ede8;
+  --dim: rgba(240,237,232,0.38);
+  --accent: #c8ff00;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Geist', system-ui, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--off-white);
+  font-family: var(--sans);
+  font-weight: 300;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CURSOR ── */
+.cur {
+  position: fixed;
+  width: 8px; height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%,-50%);
+}
+.cur-ring {
+  position: fixed;
+  width: 32px; height: 32px;
+  border: 1px solid rgba(200,255,0,0.35);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: width .3s, height .3s, opacity .3s;
+}
+
+/* ── GRAIN ── */
+body::after {
+  content:'';
+  position: fixed; inset: -200%;
+  width: 400%; height: 400%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 9990;
+  animation: grain 8s steps(10) infinite;
+}
+@keyframes grain {
+  0%  { transform:translate(0,0); }
+  10% { transform:translate(-5%,-10%); }
+  20% { transform:translate(-15%,5%); }
+  30% { transform:translate(7%,-25%); }
+  40% { transform:translate(-5%,25%); }
+  50% { transform:translate(-15%,10%); }
+  60% { transform:translate(15%,0); }
+  70% { transform:translate(0,15%); }
+  80% { transform:translate(3%,35%); }
+  90% { transform:translate(-10%,10%); }
+  100%{ transform:translate(0,0); }
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed; top:0; left:0; right:0;
+  z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 28px 48px;
+}
+.logo {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--off-white);
+  text-decoration: none;
+  opacity: 0;
+  animation: fadeIn 1s 0.2s ease forwards;
+}
+.nav-link {
+  font-size: 0.73rem;
+  letter-spacing: 0.05em;
+  color: var(--dim);
+  text-decoration: none;
+  transition: color .2s;
+  opacity: 0;
+  animation: fadeIn 1s 0.4s ease forwards;
+  cursor: none;
+}
+.nav-link:hover { color: var(--off-white); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100svh;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: 140px 48px 52px;
+}
+.hero-top { display:flex; flex-direction:column; justify-content:center; }
+
+.eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  color: var(--dim);
+  margin-bottom: 32px;
+  opacity: 0;
+  animation: fadeUp .9s .5s ease forwards;
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(4.2rem, 11.5vw, 10.5rem);
+  font-weight: 400;
+  line-height: .9;
+  letter-spacing: -.03em;
+  opacity: 0;
+  animation: fadeUp 1s .65s ease forwards;
+}
+h1 em { font-style: italic; color: var(--accent); }
+h1 .roman { font-style: normal; }
+
+.hero-sub {
+  margin-top: 36px;
+  font-size: clamp(.88rem, 1.3vw, 1rem);
+  color: var(--dim);
+  max-width: 360px;
+  line-height: 1.8;
+  opacity: 0;
+  animation: fadeUp 1s .82s ease forwards;
+}
+
+.hero-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+.hero-actions {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 1s 1.05s ease forwards;
+}
+
+.btn {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: .76rem;
+  letter-spacing: .05em;
+  font-weight: 400;
+  padding: 13px 24px;
+  border-radius: 100px;
+  text-decoration: none;
+  cursor: none;
+  transition: all .22s;
+}
+.btn-fill {
+  background: var(--accent);
+  color: #000;
+  border: 1px solid var(--accent);
+}
+.btn-fill:hover { background: transparent; color: var(--accent); }
+.btn-ghost {
+  background: transparent;
+  color: var(--off-white);
+  border: 1px solid rgba(240,237,232,.14);
+}
+.btn-ghost:hover { border-color: rgba(240,237,232,.4); }
+
+.hero-wave {
+  opacity: 0;
+  animation: fadeIn 2s 1.4s ease forwards;
+  flex-shrink: 0;
+  max-width: 320px;
+  width: 100%;
+}
+.hero-wave canvas { width:100%; height:44px; display:block; }
+.wave-meta {
+  margin-top: 8px;
+  font-size: .6rem;
+  letter-spacing: .08em;
+  color: rgba(240,237,232,.18);
+}
+
+/* ── RULE ── */
+.rule { border:none; border-top: 1px solid rgba(240,237,232,.07); }
+
+/* ── WHAT ── */
+.what {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 96px 48px;
+  border-bottom: 1px solid rgba(240,237,232,.07);
+}
+.what-l { padding-right: 72px; border-right: 1px solid rgba(240,237,232,.07); }
+.what-r { padding-left: 72px; display:flex; flex-direction:column; justify-content:flex-end; }
+
+.sec-label {
+  font-size: .67rem;
+  letter-spacing: .13em;
+  color: var(--dim);
+  display: block;
+  margin-bottom: 22px;
+}
+
+.what h2 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 4.2vw, 3.6rem);
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -.025em;
+}
+.what h2 em { font-style:italic; color: var(--accent); }
+
+.tags {
+  display: flex; flex-wrap: wrap; gap: 7px;
+  margin-top: 36px;
+}
+.tag {
+  font-size: .65rem;
+  letter-spacing: .05em;
+  color: var(--dim);
+  border: 1px solid rgba(240,237,232,.1);
+  padding: 5px 13px;
+  border-radius: 100px;
+}
+
+.body-text {
+  font-size: .88rem;
+  color: var(--dim);
+  line-height: 1.85;
+  max-width: 360px;
+}
+.body-text + .body-text { margin-top: 18px; }
+
+/* ── HOW ── */
+.how {
+  padding: 96px 48px;
+  border-bottom: 1px solid rgba(240,237,232,.07);
+  max-width: 720px;
+}
+.steps { margin-top: 48px; }
+
+.step {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 20px;
+  padding: 26px 0;
+  border-bottom: 1px solid rgba(240,237,232,.05);
+  align-items: baseline;
+}
+.step:last-child { border-bottom:none; }
+
+.step-n {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: .8rem;
+  color: rgba(240,237,232,.18);
+}
+.step h3 { font-size: .95rem; font-weight:400; margin-bottom:5px; letter-spacing:-.01em; }
+.step p { font-size: .81rem; color: var(--dim); line-height: 1.8; }
+
+/* ── JOIN ── */
+.join {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 96px 48px;
+  align-items: center;
+  border-bottom: 1px solid rgba(240,237,232,.07);
+}
+.join-l { padding-right: 72px; }
+.join-l h2 {
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 5.5vw, 4.8rem);
+  font-weight: 400;
+  line-height: .97;
+  letter-spacing: -.03em;
+}
+.join-l h2 em { font-style:italic; color: var(--accent); }
+.join-l p { margin-top:20px; font-size:.84rem; color:var(--dim); line-height:1.8; max-width:320px; }
+.join-l .note { margin-top:12px; font-size:.68rem; color:rgba(240,237,232,.18); }
+
+.join-r {
+  padding-left: 72px;
+  border-left: 1px solid rgba(240,237,232,.07);
+}
+
+.field {
+  width: 100%;
+  background: rgba(240,237,232,.04);
+  border: 1px solid rgba(240,237,232,.1);
+  border-radius: 8px;
+  padding: 15px 18px;
+  color: var(--off-white);
+  font-family: var(--sans);
+  font-size: .88rem;
+  font-weight: 300;
+  outline: none;
+  transition: border-color .2s;
+  cursor: none;
+}
+.field::placeholder { color: rgba(240,237,232,.2); }
+.field:focus { border-color: rgba(200,255,0,.4); }
+
+.options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin: 10px 0;
+}
+.opt {
+  border: 1px solid rgba(240,237,232,.1);
+  border-radius: 8px;
+  padding: 13px 15px;
+  cursor: none;
+  transition: all .2s;
+  user-select: none;
+}
+.opt:hover, .opt.active {
+  border-color: var(--accent);
+  background: rgba(200,255,0,.04);
+}
+.opt strong { display:block; font-size:.76rem; font-weight:500; margin-bottom:2px; }
+.opt span { font-size:.66rem; color:var(--dim); }
+
+.submit-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #000;
+  font-family: var(--sans);
+  font-weight: 500;
+  font-size: .8rem;
+  letter-spacing: .04em;
+  padding: 15px;
+  border: none;
+  border-radius: 8px;
+  cursor: none;
+  transition: opacity .2s;
+  margin-top: 6px;
+}
+.submit-btn:hover { opacity: .82; }
+
+.form-note { font-size:.65rem; color:rgba(240,237,232,.18); text-align:center; margin-top:6px; }
+
+.success {
+  display: none;
+  padding: 48px 0;
+  text-align: center;
+}
+.success h3 {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+.success p { font-size:.83rem; color:var(--dim); line-height:1.7; }
+
+/* ── FOOTER ── */
+footer {
+  padding: 32px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.footer-brand {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size:.88rem;
+  color:var(--dim);
+}
+.footer-legal {
+  font-size:.63rem;
+  letter-spacing:.05em;
+  color:rgba(240,237,232,.13);
+}
+.footer-credit {
+  font-size:.72rem;
+  color:var(--dim);
+}
+
+/* ── REVEAL ── */
+.reveal { opacity:0; transform:translateY(18px); transition:opacity .8s ease, transform .8s ease; }
+.reveal.in { opacity:1; transform:none; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn { to { opacity:1; } }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:none; }
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px) {
+  body { cursor:auto; }
+  .cur,.cur-ring { display:none; }
+  nav { padding:22px 24px; }
+  .hero { padding:110px 24px 44px; }
+  h1 { font-size: clamp(3.4rem, 16vw, 5rem); }
+  .hero-bottom { flex-direction:column; align-items:flex-start; }
+  .hero-wave { max-width:100%; }
+  .what { grid-template-columns:1fr; padding:60px 24px; gap:0; }
+  .what-l { padding-right:0; border-right:none; padding-bottom:44px; border-bottom:1px solid rgba(240,237,232,.07); }
+  .what-r { padding-left:0; padding-top:44px; }
+  .how { padding:60px 24px; }
+  .join { grid-template-columns:1fr; padding:60px 24px; }
+  .join-l { padding-right:0; padding-bottom:44px; }
+  .join-r { padding-left:0; border-left:none; border-top:1px solid rgba(240,237,232,.07); padding-top:44px; }
+  .options { grid-template-columns:1fr; }
+  footer { padding:28px 24px; flex-direction:column; align-items:flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div class="cur" id="cur"></div>
+<div class="cur-ring" id="ring"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">mindflux</a>
+  <a href="#join" class="nav-link">get early access →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-top">
+    <div class="eyebrow">wearable eeg &nbsp;·&nbsp; early prototype &nbsp;·&nbsp; india</div>
+    <h1>
+      <span class="roman">your brain</span><br>
+      <em>has a signal.</em><br>
+      <span class="roman">we read it.</span>
+    </h1>
+    <p class="hero-sub">
+      mindflux is a wearable eeg device that tracks your brainwave signals in real time — turning raw brain activity into clear, honest insights about stress, focus, and fatigue.
+    </p>
+  </div>
+
+  <div class="hero-bottom">
+    <div class="hero-actions">
+      <a href="#join" class="btn btn-fill">support the build</a>
+      <a href="#what" class="btn btn-ghost">learn more</a>
+    </div>
+    <div class="hero-wave">
+      <canvas id="waveCanvas" height="44"></canvas>
+      <div class="wave-meta">live eeg signal &nbsp;·&nbsp; simulated</div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- WHAT IT IS -->
+<section class="what" id="what">
+  <div class="what-l reveal">
+    <span class="sec-label">what it is</span>
+    <h2>not wellness.<br><em>actual</em><br>brain data.</h2>
+    <div class="tags">
+      <span class="tag">stress</span>
+      <span class="tag">focus</span>
+      <span class="tag">fatigue</span>
+      <span class="tag">calm</span>
+      <span class="tag">overload</span>
+    </div>
+  </div>
+  <div class="what-r reveal" style="transition-delay:.15s;">
+    <p class="body-text">
+      mindflux is a low-cost, portable eeg device built around the esp32-s3. it reads brainwave signals directly from your scalp using non-invasive electrodes, processes them onboard, and sends the result to your phone over bluetooth.
+    </p>
+    <p class="body-text" style="margin-top:18px;">
+      no cloud. no guessing from heart rate. no meditation app fluff. just real electrical brain signals — filtered, classified, and explained in plain language.
+    </p>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="reveal">
+    <span class="sec-label">how it works</span>
+    <div class="steps">
+      <div class="step">
+        <span class="step-n">i.</span>
+        <div>
+          <h3>electrodes sit on your scalp</h3>
+          <p>non-invasive sensors pick up the tiny electrical signals produced by your neurons. no gel. no lab coat. just wear it.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-n">ii.</span>
+        <div>
+          <h3>onboard chip does the processing</h3>
+          <p>an esp32-s3 with a 16-bit adc filters and amplifies the raw eeg, splitting it into alpha, beta, theta, and delta frequency bands in real time.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-n">iii.</span>
+        <div>
+          <h3>your phone shows what's happening</h3>
+          <p>data streams via bluetooth to the app. you see your brain state live, with a plain-english explanation of what changed — and why we think so.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="rule">
+
+<!-- JOIN -->
+<section class="join" id="join">
+  <div class="join-l reveal">
+    <h2>get in<br><em>early.</em></h2>
+    <p>we're in prototype stage. pick how you'd like to be involved — whether that's staying in the loop, testing it, or backing the build.</p>
+    <p class="note">v1 prototype · ~$40 to build · target device price under $100</p>
+  </div>
+
+  <div class="join-r reveal" style="transition-delay:.15s;">
+    <div id="formWrap" style="display:flex;flex-direction:column;gap:10px;">
+      <input class="field" type="email" id="emailInput" placeholder="your email address" autocomplete="email" />
+
+      <div class="options">
+        <div class="opt active" data-v="updates" onclick="pick(this)">
+          <strong>stay updated</strong>
+          <span>build updates + launch news</span>
+        </div>
+        <div class="opt" data-v="tester" onclick="pick(this)">
+          <strong>early tester</strong>
+          <span>test the prototype</span>
+        </div>
+        <div class="opt" data-v="backer" onclick="pick(this)">
+          <strong>back the project</strong>
+          <span>support + early access</span>
+        </div>
+        <div class="opt" data-v="preorder" onclick="pick(this)">
+          <strong>preorder</strong>
+          <span>first when it ships</span>
+        </div>
+      </div>
+
+      <button class="submit-btn" onclick="submit()">submit →</button>
+      <div class="form-note">no spam. one email when something real happens.</div>
+    </div>
+
+    <div class="success" id="successBox">
+      <h3>you're in.</h3>
+      <p>we'll reach out when something worth sharing happens.<br>thanks for believing in the build.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">mindflux</div>
+  <div class="footer-legal">not a medical device · for awareness only</div>
+  <div class="footer-credit">made by prateek&nbsp;♡</div>
+</footer>
+
+<script>
+/* cursor */
+const cur = document.getElementById('cur');
+const ring = document.getElementById('ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+});
+(function loop(){
+  rx+=(mx-rx)*.11; ry+=(my-ry)*.11;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(loop);
+})();
+document.querySelectorAll('a,button,.opt,input').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{ ring.style.width='48px'; ring.style.height='48px'; ring.style.opacity='.55'; });
+  el.addEventListener('mouseleave',()=>{ ring.style.width='32px'; ring.style.height='32px'; ring.style.opacity='1'; });
+});
+
+/* waveform */
+(function(){
+  const canvas=document.getElementById('waveCanvas');
+  const ctx=canvas.getContext('2d');
+  let t=0;
+  function resize(){
+    const dpr=devicePixelRatio||1;
+    canvas.width=canvas.offsetWidth*dpr;
+    canvas.height=canvas.offsetHeight*dpr;
+    ctx.scale(dpr,dpr);
+  }
+  function draw(){
+    const W=canvas.offsetWidth, H=canvas.offsetHeight;
+    ctx.clearRect(0,0,W,H);
+    const g=ctx.createLinearGradient(0,0,W,0);
+    g.addColorStop(0,'rgba(200,255,0,0)');
+    g.addColorStop(.08,'rgba(200,255,0,.75)');
+    g.addColorStop(.9,'rgba(200,255,0,.75)');
+    g.addColorStop(1,'rgba(200,255,0,0)');
+    ctx.beginPath();
+    for(let x=0;x<=W;x++){
+      const y=H/2
+        +Math.sin(x*.042+t*.9)*9
+        +Math.sin(x*.13+t*2.3)*5
+        +Math.sin(x*.026+t*.5)*7
+        +(Math.random()-.5)*2.5;
+      x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.strokeStyle=g; ctx.lineWidth=1.2;
+    ctx.shadowColor='rgba(200,255,0,.3)'; ctx.shadowBlur=7;
+    ctx.stroke(); ctx.shadowBlur=0;
+    t+=.022;
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',resize);
+  resize(); draw();
+})();
+
+/* form */
+let chosen='updates';
+function pick(el){
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('active'));
+  el.classList.add('active');
+  chosen=el.dataset.v;
+}
+function submit(){
+  const email=document.getElementById('emailInput').value.trim();
+  if(!email||!email.includes('@')){
+    const inp=document.getElementById('emailInput');
+    inp.style.borderColor='rgba(255,90,90,.5)';
+    inp.focus();
+    setTimeout(()=>inp.style.borderColor='',2000);
+    return;
+  }
+  document.getElementById('formWrap').style.display='none';
+  document.getElementById('successBox').style.display='block';
+  console.log('signup:',email,chosen); // → wire to your backend
+}
+document.getElementById('emailInput').addEventListener('keydown',e=>{ if(e.key==='Enter') submit(); });
+
+/* reveal */
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+},{threshold:.1,rootMargin:'0px 0px -60px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
